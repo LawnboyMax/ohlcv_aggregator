@@ -7,7 +7,7 @@ from whitelist import whitelist
 def get_all_unix_ms(cursor, table_name):
     """Gets the latest recorded unix_ms timestamp from specified table."""
     try:
-        sql = "SELECT unix_close FROM `{}` ORDER BY unix_close ASC".format(table_name)
+        sql = "SELECT unix_ms_close FROM `{}` ORDER BY unix_ms_close ASC".format(table_name)
         cursor.execute(sql)
         result = cursor.fetchall()
         all_unix = [x[0] for x in result]

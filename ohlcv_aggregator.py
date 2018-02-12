@@ -63,7 +63,7 @@ class OHLCVAggregator(object):
     def __create_table(self, table_name):
         """ Creates new table to hold OHLC data."""
         try:
-            self.cursor.execute("""CREATE TABLE IF NOT EXISTS `{}` (unix_close INT PRIMARY KEY,
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS `{}` (unix_ms_close INT PRIMARY KEY,
                 open REAL, high REAL, low REAL, close REAL, volume REAL)""".format(table_name))
         except Exception as e:
             print(str(e))
@@ -71,7 +71,7 @@ class OHLCVAggregator(object):
     def __get_latest_unix_ms(self, table_name):
         """Gets the latest recorded unix_ms timestamp from specified table."""
         try:
-            sql = "SELECT unix_close FROM `{}` ORDER BY unix_close DESC LIMIT 1".format(table_name)
+            sql = "SELECT unix_ms_close FROM `{}` ORDER BY unix_ms_close DESC LIMIT 1".format(table_name)
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             if result != None:
@@ -88,7 +88,7 @@ class OHLCVAggregator(object):
             volume, _ = volume
         else:
             volume = volume[0]
-        sql_query = """INSERT INTO `{}` (unix_close, open, high, low, close, volume)
+        sql_query = """INSERT INTO `{}` (unix_ms_close, open, high, low, close, volume)
             VALUES (?,?,?,?,?,?);""".format(table_name)
         sql_args = (unix_ms, open_, high, low, close, volume)
         return (sql_query, sql_args)

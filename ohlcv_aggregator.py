@@ -33,7 +33,7 @@ class OHLCVAggregator(object):
     def __init__(self, db_path, period, whitelist):
         """Inits CryptowatchOHLCAggregator with period and db_path."""
         logging.basicConfig(
-            filename='hello.log',
+            filename=os.path.join(os.getcwd(), 'logs', 'hello.log'),
             level=logging.INFO,
             format='%(asctime)s %(levelname)s %(name)s %(message)s'
         )

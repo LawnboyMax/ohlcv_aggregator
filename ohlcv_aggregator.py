@@ -6,7 +6,6 @@ import logging
 import ccxt
 from whitelist import whitelist
 
-logger = logging.Logger('catch_all')
 
 class OHLCVAggregator(object):
 
@@ -33,6 +32,12 @@ class OHLCVAggregator(object):
 
     def __init__(self, db_path, period, whitelist):
         """Inits CryptowatchOHLCAggregator with period and db_path."""
+        logging.basicConfig(
+            filename='hello.log',
+            level=logging.INFO,
+            format='%(asctime)s %(levelname)s %(name)s %(message)s'
+        )
+        self.logger = logging.getLogger(__name__)
         self.db_path = db_path
         self.connection, self.cursor = self.__init_db()
         self.period = period
@@ -134,26 +139,25 @@ class OHLCVAggregator(object):
                         self.table_names.add(table_name)
                     self.__insert_tx(table_name, ohlcv_data)
                 except ccxt.errors.NotSupported as e:
-                    print(logger.error(e, exc_info=True))
+                    self.logger.info(e, exc_info=True)
                 except ccxt.errors.AuthenticationError as e:
-                    print(logger.error(e))
+                    self.logger.info(e, exc_info = True)
                 except ccxt.errors.DDoSProtection as e:
-                    print(logger.error(e))
-                    print('DDOS ERROR')
+                    self.logger.error(e, exc_info = True)
                 except ccxt.errors.RequestTimeout as e:
-                    print(logger.error(e))
-                    print('TIMEOUT ERROR')
+                    self.logger.error(e, exc_info = True)
                 except ccxt.errors.ExchangeNotAvailable as e:
-                    print(logger.error(e))
-                    print('EXCHANGE NOT AVAILABLE')
+                    self.logger.error(e, exc_info = True)
                 except ccxt.errors.ExchangeError as e:
-                    print(logger.error(e))
+                    self.logger.error(e, exc_info = True)
 
 def main():
     wl = whitelist
     database_path = os.path.join(os.getcwd(), 'data', 'ohlcv.db')
     aggregator = OHLCVAggregator(db_path=database_path, period='1m', whitelist=wl)
-    aggregator.update_ohlcv()
+    aggregator.logger.info('Start reading database')
+    aggregator.update_ohlc()
+    aggregator.logger.info('Finish updating records')
 
 if __name__ == '__main__':
     main()

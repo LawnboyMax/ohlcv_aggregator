@@ -27,7 +27,7 @@ class OHLCVAggregator(object):
         cursor: SQLite db cursor; used for executing all SQL queries.
         period: An string that specifies desired OHLCV period.
         whitelist: A dict containing exchanges and their pairs that we want to fetch.
-        track_pairs: A set of all asset pairs that the aggregator is tracking.
+        table_names: A set of all asset pairs that the aggregator is tracking.
                     Corresponds to table names used in the db.
     """
 
@@ -37,7 +37,7 @@ class OHLCVAggregator(object):
         self.connection, self.cursor = self.__init_db()
         self.period = period
         self.whitelist = whitelist
-        self.track_pairs = self.__init_track_pairs()
+        self.table_names = self.__init_table_names()
 
     def __init_db(self):
         """Inits db connection and cursor."""
@@ -45,12 +45,12 @@ class OHLCVAggregator(object):
         cursor = connection.cursor()
         return connection, cursor
 
-    def __init_track_pairs(self):
-        """ Get existing tracked pairs by examining table names in the db."""
+    def __init_table_names(self):
+        """ Get existing table names from the db."""
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
         result = self.cursor.fetchall() # gets all existing table names (asset pairs)
-        track_pairs = set([x[0] for x in result])
-        return track_pairs
+        table_names = set([x[0] for x in result])
+        return table_names
 
     @staticmethod
     def __create_table_name(exchange_name, pair_name):
@@ -63,7 +63,7 @@ class OHLCVAggregator(object):
     def __create_table(self, table_name):
         """ Creates new table to hold OHLC data."""
         try:
-            self.cursor.execute("""CREATE TABLE IF NOT EXISTS `{}` (unix_ms_close INT PRIMARY KEY,
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS `{}` (unix_close INT PRIMARY KEY,
                 open REAL, high REAL, low REAL, close REAL, volume REAL)""".format(table_name))
         except Exception as e:
             print(str(e))
@@ -71,7 +71,7 @@ class OHLCVAggregator(object):
     def __get_latest_unix_ms(self, table_name):
         """Gets the latest recorded unix_ms timestamp from specified table."""
         try:
-            sql = "SELECT unix_ms_close FROM `{}` ORDER BY unix_ms_close DESC LIMIT 1".format(table_name)
+            sql = "SELECT unix_close FROM `{}` ORDER BY unix_close DESC LIMIT 1".format(table_name)
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             if result != None:
@@ -88,7 +88,7 @@ class OHLCVAggregator(object):
             volume, _ = volume
         else:
             volume = volume[0]
-        sql_query = """INSERT INTO `{}` (unix_ms_close, open, high, low, close, volume)
+        sql_query = """INSERT INTO `{}` (unix_close, open, high, low, close, volume)
             VALUES (?,?,?,?,?,?);""".format(table_name)
         sql_args = (unix_ms, open_, high, low, close, volume)
         return (sql_query, sql_args)
@@ -129,9 +129,9 @@ class OHLCVAggregator(object):
                     # try fetching ohlcv data... proceed with other stuff only if this succeeds
                     ohlcv_data = exchange.fetch_ohlcv(pair, self.period)
                     table_name = OHLCVAggregator.__create_table_name(exchange_name, pair)
-                    if table_name not in self.track_pairs:
+                    if table_name not in self.table_names:
                         self.__create_table(table_name) # create table for unseen pair if needed
-                        self.track_pairs.add(table_name)
+                        self.table_names.add(table_name)
                     self.__insert_tx(table_name, ohlcv_data)
                 except ccxt.errors.NotSupported as e:
                     print(logger.error(e, exc_info=True))

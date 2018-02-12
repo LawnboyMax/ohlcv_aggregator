@@ -156,7 +156,7 @@ def main():
     database_path = os.path.join(os.getcwd(), 'data', 'ohlcv.db')
     aggregator = OHLCVAggregator(db_path=database_path, period='1m', whitelist=wl)
     aggregator.logger.info('Start reading database')
-    aggregator.update_ohlc()
+    aggregator.update_ohlcv()
     aggregator.logger.info('Finish updating records')
 
 if __name__ == '__main__':

@@ -33,7 +33,7 @@ class OHLCVAggregator(object):
     def __init__(self, db_path, period, whitelist):
         """Inits CryptowatchOHLCAggregator with period and db_path."""
         logging.basicConfig(
-            filename=os.path.join(os.getcwd(), 'logs', 'hello.log'),
+            filename=os.path.abspath(os.path.join(os.path.dirname(__file__), 'logs', 'hello.log')),
             level=logging.INFO,
             format='%(asctime)s %(levelname)s %(name)s %(message)s'
         )
@@ -153,7 +153,7 @@ class OHLCVAggregator(object):
 
 def main():
     wl = whitelist
-    database_path = os.path.join(os.getcwd(), 'data', 'ohlcv.db')
+    database_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data', 'ohlcv.db'))
     aggregator = OHLCVAggregator(db_path=database_path, period='1m', whitelist=wl)
     aggregator.logger.info('Start reading database')
     aggregator.update_ohlcv()

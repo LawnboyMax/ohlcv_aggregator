@@ -17,11 +17,14 @@ def get_all_unix_ms(cursor, table_name):
 
 def check_period(all_unix_ms, period_ms, table_name):
     """Checks if adjacent OHLCV records in a table have expected period."""
-    prev_unix_ms = all_unix_ms[0] - period_ms
-    for unix_ms in all_unix_ms:
-        if unix_ms - prev_unix_ms != period_ms:
-            print('Inconsistency in {}. At least two adjacent OHLCV records have period of {} ms'.format(table_name, unix_ms-prev_unix_ms))
-        prev_unix_ms = unix_ms
+    if all_unix_ms:
+        prev_unix_ms = all_unix_ms[0] - period_ms
+        for unix_ms in all_unix_ms:
+            if unix_ms - prev_unix_ms != period_ms:
+                print('Inconsistency in {}. At least two adjacent OHLCV records have period of {} ms'.format(table_name, unix_ms-prev_unix_ms))
+            prev_unix_ms = unix_ms
+    else:
+        print('No records found in table {}'.format(table_name))
 
 def check_data_consistency(cursor, table_names, period_ms):
     """Checks every table in db for unix_ms period consistency between adjacent OHLCV records."""

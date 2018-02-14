@@ -31,7 +31,8 @@ def check_data_consistency(cursor, table_names, period_ms):
 
 def main():
     wl = whitelist
-    database_path = os.path.abspath(os.path.join(os.path.abspath(__file__), 'data', 'ohlcv.db'))
+    database_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data', 'ohlcv.db'))
+    print(database_path)
     aggregator = OHLCVAggregator(db_path=database_path, period='1m', whitelist=wl)
     check_data_consistency(aggregator.cursor, aggregator.table_names, period_ms=60000)
 

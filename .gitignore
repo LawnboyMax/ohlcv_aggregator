@@ -105,5 +105,6 @@ venv.bak/
 .mypy_cache/
 data/**
 logs/**
+keys/**
 nohup.out
 

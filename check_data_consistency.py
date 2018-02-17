@@ -22,6 +22,7 @@ def check_period(all_unix_ms, period_ms, table_name):
         for unix_ms in all_unix_ms:
             if unix_ms - prev_unix_ms != period_ms:
                 print('Inconsistency in {}. At least two adjacent OHLCV records have period of {} ms'.format(table_name, unix_ms-prev_unix_ms))
+                break
             prev_unix_ms = unix_ms
     else:
         print('No records found in table {}'.format(table_name))

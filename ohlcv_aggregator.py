@@ -31,7 +31,7 @@ class OHLCVAggregator(object):
     """
 
     def __init__(self, db_path, period, whitelist):
-        """Inits CryptowatchOHLCAggregator with period and db_path."""
+        """Inits CCXT_OHLC_Aggregator with period and db_path."""
         logging.basicConfig(
             filename=os.path.abspath(os.path.join(os.path.dirname(__file__), 'logs', 'hello.log')),
             level=logging.INFO,
@@ -120,7 +120,7 @@ class OHLCVAggregator(object):
         self.connection.commit()
 
     def update_ohlcv(self):
-        """Updates the db with the latest OHLC data from cryptowat.ch"""
+        """Updates the db with the latest OHLC data from whitelisted exchanges"""
         exchange_names = self.whitelist['exchanges'].keys()
         for exchange_name in exchange_names:
             exchange = getattr(ccxt, exchange_name)()
@@ -155,9 +155,10 @@ def main():
     wl = whitelist
     database_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data', 'ohlcv.db'))
     aggregator = OHLCVAggregator(db_path=database_path, period='1m', whitelist=wl)
-    aggregator.logger.info('Start reading database')
+    aggregator.logger.info('Started reading database')
     aggregator.update_ohlcv()
-    aggregator.logger.info('Finish updating records')
+    aggregator.logger.info('Finished updating records\n\n###############################################################\n')
+
 
 if __name__ == '__main__':
     main()

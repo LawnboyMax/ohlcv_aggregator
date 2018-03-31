@@ -38,6 +38,7 @@ class OHLCVAggregator(object):
             format='%(asctime)s %(levelname)s %(name)s %(message)s'
         )
         self.logger = logging.getLogger(__name__)
+        self.requests_log = logging.getLogger("requests").setLevel(logging.INFO)
         self.db_path = db_path
         self.connection, self.cursor = self.__init_db()
         self.period = period
@@ -124,7 +125,11 @@ class OHLCVAggregator(object):
         exchange_names = self.whitelist['exchanges'].keys()
         for exchange_name in exchange_names:
             exchange = getattr(ccxt, exchange_name)()
-            markets = exchange.load_markets()
+            try:
+                markets = exchange.load_markets()
+            except Exception as e:
+                self.logger.error(e, exc_info = True)
+                continue # don't proceed if loading market isn't working
             pairs = self.whitelist['exchanges'][exchange_name]
             # if no particular pairs are whitelisted, fetch all pairs from market
             if not pairs:
@@ -139,7 +144,7 @@ class OHLCVAggregator(object):
                         self.table_names.add(table_name)
                     self.__insert_tx(table_name, ohlcv_data)
                 except ccxt.errors.NotSupported as e:
-                    self.logger.info(e, exc_info=True)
+                    self.logger.info(e, exc_info = True)
                 except ccxt.errors.AuthenticationError as e:
                     self.logger.info(e, exc_info = True)
                 except ccxt.errors.DDoSProtection as e:
